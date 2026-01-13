@@ -28,7 +28,8 @@ jobs:
 
     - name: Send Email
       run: |
-        python send_mail.py
+        python ./send_mail.py
+
       env:
         EMAIL_USER: ${{ secrets.EMAIL_USER }}
         EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
