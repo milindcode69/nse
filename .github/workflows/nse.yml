@@ -3,6 +3,7 @@ name: NSE Turnover Scanner
 on:
   schedule:
     - cron: '30 2 * * 1-5'   # Runs at 08:00 AM IST (02:30 UTC), Mon–Fri
+    cron: '0 0 * * *'     # keeps repo alive
   workflow_dispatch:
 
 jobs:
