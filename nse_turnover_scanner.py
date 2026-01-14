@@ -2,7 +2,7 @@ import pandas as pd
 import requests
 import io
 import datetime
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta, timezone
 
 BASE_URL = "https://archives.nseindia.com/products/content/sec_bhavdata_full_{date}.csv"
 
@@ -30,7 +30,7 @@ def download_bhavcopy(date):
 
 def main():
     IST = timezone(timedelta(hours=5, minutes=30))
-    today = datetime.now(IST).date()
+    today = datetime.datetime.now(IST).date()
     
     day2 = get_previous_working_day(today)
     day1 = get_previous_working_day(day2)
@@ -75,4 +75,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
