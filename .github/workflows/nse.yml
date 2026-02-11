@@ -27,6 +27,7 @@ jobs:
         python nse_turnover_scanner.py
 
     - name: Send Email
+      if: hashFiles('RUN_OK') != ''
       run: |
         python ./send_mail.py
 
