@@ -2,8 +2,6 @@ import pandas as pd
 import requests
 import io
 import datetime
-import os
-import sys
 from datetime import timedelta, timezone
 
 BASE_URL = "https://archives.nseindia.com/products/content/sec_bhavdata_full_{date}.csv"
@@ -15,13 +13,11 @@ NSE_HOLIDAYS = {
 }
 NSE_HOLIDAYS = {datetime.datetime.strptime(d, "%Y-%m-%d").date() for d in NSE_HOLIDAYS}
 
-
 def get_previous_working_day(d):
     while True:
         d -= datetime.timedelta(days=1)
         if d.weekday() < 5 and d not in NSE_HOLIDAYS:
             return d
-
 
 def download_bhavcopy(date):
     url = BASE_URL.format(date=date.strftime("%d%m%Y"))
@@ -32,36 +28,10 @@ def download_bhavcopy(date):
     df.columns = df.columns.str.strip()
     return df
 
-
-def should_run_today():
-    IST = timezone(timedelta(hours=5, minutes=30))
-    now = datetime.datetime.now(IST)
-
-    # Do not run before 6 AM IST
-    if now.hour < 6:
-        print("Before 6 AM IST — skipping run")
-        return False
-
-    today = now.date()
-    day2 = get_previous_working_day(today)
-
-    expected_file = f"turnover_{day2.strftime('%d%m%Y')}.csv"
-
-    if os.path.exists(expected_file):
-        print(f"{expected_file} already exists — skipping run")
-        return False
-
-    return True
-
-
 def main():
-
-    if not should_run_today():
-        sys.exit(0)
-
     IST = timezone(timedelta(hours=5, minutes=30))
     today = datetime.datetime.now(IST).date()
-
+    
     day2 = get_previous_working_day(today)
     day1 = get_previous_working_day(day2)
 
@@ -100,19 +70,15 @@ def main():
     })
 
     output = output.sort_values(
-        by=f"Turnover_{day1.strftime('%d%b')}", ascending=False
+        by=f"Turnover_{day1.strftime('%d%b')}",
+        ascending=False
     )
 
     filename = f"turnover_{day2.strftime('%d%m%Y')}.csv"
     output.to_csv(filename, index=False)
 
-    # ✅ Mark successful run (prevents duplicate emails)
-    with open("RUN_OK", "w") as f:
-        f.write(filename)
-
     print("\nSaved:", filename)
     print(output.head(10))
-
 
 if __name__ == "__main__":
     main()
