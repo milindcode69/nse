@@ -98,9 +98,13 @@ def main():
 
     print("\nSaved:", filename)
     print(output.head(10))
+    # Mark successful run for GitHub Actions
+with open("RUN_OK", "w") as f:
+    f.write(filename)
 
 if __name__ == "__main__":
     main()
+
 
 
 
