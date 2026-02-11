@@ -15,11 +15,13 @@ NSE_HOLIDAYS = {
 }
 NSE_HOLIDAYS = {datetime.datetime.strptime(d, "%Y-%m-%d").date() for d in NSE_HOLIDAYS}
 
+
 def get_previous_working_day(d):
     while True:
         d -= datetime.timedelta(days=1)
         if d.weekday() < 5 and d not in NSE_HOLIDAYS:
             return d
+
 
 def download_bhavcopy(date):
     url = BASE_URL.format(date=date.strftime("%d%m%Y"))
@@ -29,6 +31,7 @@ def download_bhavcopy(date):
     df = pd.read_csv(io.StringIO(r.text))
     df.columns = df.columns.str.strip()
     return df
+
 
 def should_run_today():
     IST = timezone(timedelta(hours=5, minutes=30))
@@ -50,14 +53,15 @@ def should_run_today():
 
     return True
 
+
 def main():
-   
+
     if not should_run_today():
         sys.exit(0)
 
     IST = timezone(timedelta(hours=5, minutes=30))
     today = datetime.datetime.now(IST).date()
-    
+
     day2 = get_previous_working_day(today)
     day1 = get_previous_working_day(day2)
 
@@ -69,18 +73,20 @@ def main():
     df1["SERIES"] = df1["SERIES"].astype(str).str.strip()
     df2["SERIES"] = df2["SERIES"].astype(str).str.strip()
 
-    df1 = df1[df1["SERIES"]=="EQ"]
-    df2 = df2[df2["SERIES"]=="EQ"]
+    df1 = df1[df1["SERIES"] == "EQ"]
+    df2 = df2[df2["SERIES"] == "EQ"]
 
-    df = pd.merge(df1, df2, on="SYMBOL", suffixes=("_D1","_D2"))
+    df = pd.merge(df1, df2, on="SYMBOL", suffixes=("_D1", "_D2"))
 
-    df = df[(df["TURNOVER_LACS_D1"]>5000) & (df["TURNOVER_LACS_D2"]>5000)]
+    df = df[(df["TURNOVER_LACS_D1"] > 5000) & (df["TURNOVER_LACS_D2"] > 5000)]
 
-    # Convert delivery % to numeric
     df["DELIV_PER_D2"] = pd.to_numeric(df["DELIV_PER_D2"], errors="coerce")
 
     df["Turnover_Multiple"] = df["TURNOVER_LACS_D2"] / df["TURNOVER_LACS_D1"]
-    df["Price_Change_%"] = ((df["CLOSE_PRICE_D2"] - df["CLOSE_PRICE_D1"]) / df["CLOSE_PRICE_D1"]) * 100
+    df["Price_Change_%"] = (
+        (df["CLOSE_PRICE_D2"] - df["CLOSE_PRICE_D1"]) / df["CLOSE_PRICE_D1"]
+    ) * 100
+
     df = df[df["Turnover_Multiple"] > 1.5]
 
     output = pd.DataFrame({
@@ -92,19 +98,21 @@ def main():
         "Delivery %": df["DELIV_PER_D2"].round(2),
         "Price Change %": df["Price_Change_%"].round(2)
     })
-    output = output.sort_values(by=f"Turnover_{day1.strftime('%d%b')}", ascending=False)
+
+    output = output.sort_values(
+        by=f"Turnover_{day1.strftime('%d%b')}", ascending=False
+    )
+
     filename = f"turnover_{day2.strftime('%d%m%Y')}.csv"
     output.to_csv(filename, index=False)
 
+    # ✅ Mark successful run (prevents duplicate emails)
+    with open("RUN_OK", "w") as f:
+        f.write(filename)
+
     print("\nSaved:", filename)
     print(output.head(10))
-    # Mark successful run for GitHub Actions
-with open("RUN_OK", "w") as f:
-    f.write(filename)
+
 
 if __name__ == "__main__":
     main()
-
-
-
-
