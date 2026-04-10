@@ -48,7 +48,7 @@ def main():
 
     df = pd.merge(df1, df2, on="SYMBOL", suffixes=("_D1", "_D2"))
 
-    df = df[(df["TURNOVER_LACS_D1"] > 5000) & (df["TURNOVER_LACS_D2"] > 5000)]
+    df = df[(df["TURNOVER_LACS_D1"] > 7000) & (df["TURNOVER_LACS_D2"] > 7000)]
 
     df["DELIV_PER_D2"] = pd.to_numeric(df["DELIV_PER_D2"], errors="coerce")
 
