@@ -64,7 +64,7 @@ def main():
         "Date": day2.strftime("%d-%m-%Y"),
         f"Turnover_{day1.strftime('%d%b')}": df["TURNOVER_LACS_D1"].astype(int),
         f"Turnover_{day2.strftime('%d%b')}": df["TURNOVER_LACS_D2"].astype(int),
-        f"Close_{day2.strftime('%d%b')}": df["CLOSE_PRICE_D2"].astype(int),
+        f"Close_{day2.strftime('%d%b')}": df["CLOSE_PRICE_D2"].astype(float).round(2),
         "Turnover Multiple": df["Turnover_Multiple"].round(2),
         "Delivery %": df["DELIV_PER_D2"].round(2),
         "Price Change %": df["Price_Change_%"].round(2)
